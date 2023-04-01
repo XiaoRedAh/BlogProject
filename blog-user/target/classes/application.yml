@@ -1,0 +1,30 @@
+server:
+  port: 7777
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/xhr_blog?characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: cronaldo7
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 5MB
+  redis:
+    host: 127.0.0.1 #redis服务器ip地址
+    port: 6379  #redis端口号
+mybatis-plus:
+  configuration:
+    # 日志
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: delFlag
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      id-type: auto
+
+oss:
+  accessKey: YYUSyy-p1F-OJbkFl1WTSSsLc0VETjdGg2pfttqz
+  secretKey: WuqXKAvjK6mOBL80XC982W2dYmC4Fh1WX1Bc39-Y
+  bucket: xhr-blog

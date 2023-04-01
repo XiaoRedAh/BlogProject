@@ -1,0 +1,12 @@
+com\xiaored\controller\ArticleController.class
+com\xiaored\filter\JwtAuthenticationTokenFilter.class
+com\xiaored\controller\TagController.class
+com\xiaored\controller\CategoryController.class
+com\xiaored\controller\AdminLoginController.class
+com\xiaored\controller\UserController.class
+com\xiaored\controller\UploadController.class
+com\xiaored\config\SecurityConfig.class
+com\xiaored\controller\LinkController.class
+com\xiaored\controller\RoleController.class
+com\xiaored\BlogAdminApplication.class
+com\xiaored\controller\MenuController.class
