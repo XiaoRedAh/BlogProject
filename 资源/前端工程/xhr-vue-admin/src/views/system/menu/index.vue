@@ -293,6 +293,7 @@ export default {
       return {
         id: node.id,
         label: node.menuName,
+        //menuName: node.menuName,
         children: node.children
       }
     },
