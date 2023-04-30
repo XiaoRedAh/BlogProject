@@ -1,11 +1,13 @@
 package com.xiaored.controller;
 
 import com.xiaored.domain.ResponseResult;
+import com.xiaored.domain.dto.AddRoleDto;
 import com.xiaored.domain.entity.Role;
 import com.xiaored.service.RoleService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/system/role")
@@ -25,6 +27,11 @@ public class RoleController {
     @DeleteMapping("/{id}")
     public ResponseResult deleteById(@PathVariable("id") Long id){
         return ResponseResult.okResult(roleService.removeById(id));
+    }
+
+    @PostMapping()
+    public ResponseResult addRole(@RequestBody AddRoleDto addRoleDto){
+        return roleService.addRole(addRoleDto);
     }
 
 }

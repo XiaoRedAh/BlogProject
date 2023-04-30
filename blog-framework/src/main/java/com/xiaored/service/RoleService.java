@@ -2,6 +2,7 @@ package com.xiaored.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xiaored.domain.ResponseResult;
+import com.xiaored.domain.dto.AddRoleDto;
 import com.xiaored.domain.entity.Role;
 
 import java.util.List;
@@ -20,6 +21,8 @@ public interface RoleService extends IService<Role> {
     ResponseResult roleList(Integer pageNum, Integer pageSize, String roleName, String status);
 
     ResponseResult changeStatus(Role role);
+
+    ResponseResult addRole(AddRoleDto map);
 
     //ResponseResult deleteById(Long );
 }

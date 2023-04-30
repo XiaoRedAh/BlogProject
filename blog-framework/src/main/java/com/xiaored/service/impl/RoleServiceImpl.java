@@ -4,21 +4,28 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.collect.Lists;
 import com.xiaored.constants.SystemConstants;
 import com.xiaored.domain.ResponseResult;
+import com.xiaored.domain.dto.AddRoleDto;
 import com.xiaored.domain.entity.Article;
 import com.xiaored.domain.entity.Role;
+import com.xiaored.domain.entity.RoleMenu;
 import com.xiaored.enums.AppHttpCodeEnum;
 import com.xiaored.mapper.RoleMapper;
+import com.xiaored.service.RoleMenuService;
 import com.xiaored.service.RoleService;
 import com.xiaored.utils.BeanCopyUtils;
 import com.xiaored.vo.AdminArticleListVo;
 import com.xiaored.vo.PageVo;
 import com.xiaored.vo.RoleVo;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -29,6 +36,8 @@ import java.util.Objects;
  */
 @Service("roleService")
 public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements RoleService {
+    @Resource
+    RoleMenuService roleMenuService;
 
     @Override
     public List<String> selectRoleKeyByUserId(Long id) {
@@ -70,6 +79,19 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
             return ResponseResult.okResult();
         }
         return ResponseResult.errorResult(AppHttpCodeEnum.SYSTEM_ERROR,"未知错误，修改失败");
+    }
+
+    @Override
+    public ResponseResult addRole(AddRoleDto roleDto) {
+        //将role添加到sys_role数据库
+        Role role = BeanCopyUtils.copyBean(roleDto, Role.class);
+        save(role);
+        //将role_id和menu_id成对添加到sys_role_menu数据库
+        List<Long> menuIds = roleDto.getMenuIds();
+        for (Long menu_id:menuIds) {
+            roleMenuService.save(new RoleMenu(role.getId(),menu_id));
+        }
+        return ResponseResult.okResult();
     }
 
     /*@Override

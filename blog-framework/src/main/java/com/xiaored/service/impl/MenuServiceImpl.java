@@ -13,6 +13,8 @@ import com.xiaored.service.MenuService;
 import com.xiaored.utils.BeanCopyUtils;
 import com.xiaored.utils.SecurityUtils;
 import com.xiaored.vo.MenuInfoVo;
+
+import com.xiaored.vo.MenuTreeVo;
 import com.xiaored.vo.MenuVo;
 import org.springframework.stereotype.Service;
 
@@ -115,6 +117,48 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         return ResponseResult.errorResult(AppHttpCodeEnum.SYSTEM_ERROR,"存在子菜单不允许删除");
     }
 
+    @Override
+    public ResponseResult getMenuTree(Long userId) {
+        MenuMapper menuMapper = getBaseMapper();
+        List<Menu> menus = null;
+        //判断是否是管理员
+        if(SecurityUtils.isAdmin()){
+            //如果是 获取所有符合要求的Menu
+            menus = menuMapper.selectAllRouterMenu();
+        }else{
+            //否则  获取当前用户所具有的Menu
+            menus = menuMapper.selectRouterMenuTreeByUserId(userId);
+        }
+
+        //构建tree,先把第一层bean拷贝为vo
+        //先找出第一层的菜单  然后去找他们的子菜单设置到children属性中
+        List<MenuTreeVo> menuTreeVos = BeanCopyUtils.copyBeanList(menus, MenuTreeVo.class);
+        //因为前端想要的是label，我又不会改前端，那就只能先bean拷贝得到menuName，然后用set方法给到label
+        for (MenuTreeVo menuTreeVo :menuTreeVos) {
+            menuTreeVo.setLabel(menuTreeVo.getMenuName());
+        }
+        menuTreeVos = builderMenuTreeVos(menuTreeVos,0L);
+
+        return ResponseResult.okResult(menuTreeVos);
+    }
+
+    private List<MenuTreeVo> builderMenuTreeVos(List<MenuTreeVo> menuTreeVos, long parentId) {
+        List<MenuTreeVo> menuTree = menuTreeVos.stream()
+                .filter(menuTreeVo -> menuTreeVo.getParentId().equals(parentId))
+                .map(menuTreeVo -> menuTreeVo.setChildren(getChildren(menuTreeVo,menuTreeVos)))
+                .collect(Collectors.toList());
+        return menuTree;
+    }
+
+    private List<MenuTreeVo> getChildren(MenuTreeVo menuTreeVo, List<MenuTreeVo> menuTreeVos) {
+        List<MenuTreeVo> childrenList = menuTreeVos.stream()
+                .filter(m -> m.getParentId().equals(menuTreeVo.getId()))
+                .map(m->m.setChildren(getChildren(m,menuTreeVos)))
+                .collect(Collectors.toList());
+        return childrenList;
+    }
+
+
     private List<Menu> builderMenuTree(List<Menu> menus, Long parentId) {
         List<Menu> menuTree = menus.stream()
                 .filter(menu -> menu.getParentId().equals(parentId))
@@ -136,5 +180,6 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
                 .collect(Collectors.toList());
         return childrenList;
     }
+
 }
 
