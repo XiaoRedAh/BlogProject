@@ -3,6 +3,8 @@ package com.xiaored.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xiaored.domain.entity.RoleMenu;
 
+import java.util.List;
+
 
 /**
  * 角色和菜单关联表(SysRoleMenu)表服务接口
@@ -12,5 +14,8 @@ import com.xiaored.domain.entity.RoleMenu;
  */
 public interface RoleMenuService extends IService<RoleMenu> {
 
+    List<Long> getMenuIdsByRoleId(Long id);
+
+    List<Long> getAllMenuId();
 }
 

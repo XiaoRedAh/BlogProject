@@ -1,23 +1,25 @@
 package com.xiaored.service.impl;
 
-import com.alibaba.excel.util.ListUtils;
+
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xiaored.constants.SystemConstants;
 import com.xiaored.domain.ResponseResult;
 import com.xiaored.domain.entity.Menu;
 import com.xiaored.enums.AppHttpCodeEnum;
-import com.xiaored.exception.SystemException;
 import com.xiaored.mapper.MenuMapper;
 import com.xiaored.service.MenuService;
+import com.xiaored.service.RoleMenuService;
 import com.xiaored.utils.BeanCopyUtils;
 import com.xiaored.utils.SecurityUtils;
 import com.xiaored.vo.MenuInfoVo;
 
 import com.xiaored.vo.MenuTreeVo;
 import com.xiaored.vo.MenuVo;
+import com.xiaored.vo.RoleMenuTreeVo;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -31,6 +33,8 @@ import java.util.stream.Collectors;
 @Service("menuService")
 public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements MenuService {
 
+    @Resource
+    RoleMenuService roleMenuService;
     @Override
     public List<String> selectPermsByUserId(Long id) {
         //如果是管理员，返回所有的权限
@@ -140,6 +144,31 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         menuTreeVos = builderMenuTreeVos(menuTreeVos,0L);
 
         return ResponseResult.okResult(menuTreeVos);
+    }
+
+    @Override
+    public ResponseResult roleMenuTreeSelect(Long id) {
+        //获得所有的菜单和它们的父子关系
+        MenuMapper menuMapper = getBaseMapper();
+        List<Menu> menus = null;
+        menus = menuMapper.selectAllRouterMenu();//回显所有菜单
+        //构建tree,先把第一层bean拷贝为vo
+        //先找出第一层的菜单  然后去找他们的子菜单设置到children属性中
+        List<MenuTreeVo> menuTreeVos = BeanCopyUtils.copyBeanList(menus, MenuTreeVo.class);
+        //因为前端想要的是label，我又不会改前端，那就只能先bean拷贝得到menuName，然后用set方法给到label
+        for (MenuTreeVo menuTreeVo :menuTreeVos) {
+            menuTreeVo.setLabel(menuTreeVo.getMenuName());
+        }
+        menuTreeVos = builderMenuTreeVos(menuTreeVos,0L);
+        //通过传进来的角色id查找它匹配的所有的菜单id(如果是超级管理员，那么返回所有菜单id)
+        List<Long> checkedKeys = null;
+        if(id==1){
+            checkedKeys = roleMenuService.getAllMenuId();
+        }else{
+            checkedKeys = roleMenuService.getMenuIdsByRoleId(id);
+        }
+        RoleMenuTreeVo roleMenuTreeVo = new RoleMenuTreeVo(menuTreeVos,checkedKeys);
+        return ResponseResult.okResult(roleMenuTreeVo);
     }
 
     private List<MenuTreeVo> builderMenuTreeVos(List<MenuTreeVo> menuTreeVos, long parentId) {

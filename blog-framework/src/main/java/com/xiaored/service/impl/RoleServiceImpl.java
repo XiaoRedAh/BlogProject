@@ -1,6 +1,7 @@
 package com.xiaored.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -8,6 +9,7 @@ import com.google.common.collect.Lists;
 import com.xiaored.constants.SystemConstants;
 import com.xiaored.domain.ResponseResult;
 import com.xiaored.domain.dto.AddRoleDto;
+import com.xiaored.domain.dto.UpdateRoleDto;
 import com.xiaored.domain.entity.Article;
 import com.xiaored.domain.entity.Role;
 import com.xiaored.domain.entity.RoleMenu;
@@ -94,9 +96,30 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         return ResponseResult.okResult();
     }
 
-    /*@Override
-    public ResponseResult deleteById(Long id) {
+    @Override
+    public ResponseResult getRoleInfoById(Long id) {
+        Role role = getById(id);
+        RoleVo roleVo = BeanCopyUtils.copyBean(role, RoleVo.class);
+        return ResponseResult.okResult(roleVo);
+    }
 
-    }*/
+    @Override
+    public ResponseResult updateRole(UpdateRoleDto updateRoleDto) {
+        //更新用户信息
+        Role role = BeanCopyUtils.copyBean(updateRoleDto,Role.class);
+        updateById(role);
+        //更新用户菜单关联表（之前的都删掉，重新建立关系）
+        Long roleId = updateRoleDto.getId();
+        QueryWrapper<RoleMenu> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("role_id",roleId);
+        roleMenuService.remove(queryWrapper);
+        List<Long> MenuIds = updateRoleDto.getMenuIds();
+        for (Long menuId:MenuIds) {
+            roleMenuService.save(new RoleMenu(roleId,menuId));
+        }
+        return ResponseResult.okResult();
+    }
+
+
 }
 

@@ -2,6 +2,7 @@ package com.xiaored.controller;
 
 import com.xiaored.domain.ResponseResult;
 import com.xiaored.domain.dto.AddRoleDto;
+import com.xiaored.domain.dto.UpdateRoleDto;
 import com.xiaored.domain.entity.Role;
 import com.xiaored.service.RoleService;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +38,16 @@ public class RoleController {
     @GetMapping("/listAllRole")
     public ResponseResult listAllRole(){
         return ResponseResult.okResult(roleService.list());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseResult getRoleInfoById(@PathVariable("id") Long id){
+        return roleService.getRoleInfoById(id);
+    }
+
+    @PutMapping()
+    public ResponseResult updateRole(@RequestBody UpdateRoleDto updateRoleDto){
+        return roleService.updateRole(updateRoleDto);
     }
 
 }

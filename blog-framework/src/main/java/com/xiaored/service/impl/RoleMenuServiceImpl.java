@@ -7,6 +7,9 @@ import com.xiaored.mapper.RoleMenuMapper;
 import com.xiaored.service.RoleMenuService;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+import java.util.List;
+
 /**
  * 角色和菜单关联表(RoleMenu)表服务实现类
  *
@@ -16,5 +19,16 @@ import org.springframework.stereotype.Service;
 @Service("roleMenuService")
 public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu> implements RoleMenuService {
 
+    @Resource
+    RoleMenuMapper mapper;
+    @Override
+    public List<Long> getMenuIdsByRoleId(Long id) {
+       return mapper.getMenuIdsByRoleId(id);
+    }
+
+    @Override
+    public List<Long> getAllMenuId() {
+        return mapper.getAllMenuId();
+    }
 }
 

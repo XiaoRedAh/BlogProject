@@ -2,6 +2,9 @@ package com.xiaored.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.xiaored.domain.entity.RoleMenu;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 
 /**
@@ -12,4 +15,9 @@ import com.xiaored.domain.entity.RoleMenu;
  */
 public interface RoleMenuMapper extends BaseMapper<RoleMenu> {
 
+    @Select("select menu_id from sys_role_menu where role_id = #{id}")
+    List<Long> getMenuIdsByRoleId(Long id);
+
+    @Select("select menu_id from sys_role_menu")
+    List<Long> getAllMenuId();
 }
