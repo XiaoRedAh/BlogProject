@@ -2,6 +2,7 @@ package com.xiaored.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xiaored.domain.ResponseResult;
+import com.xiaored.domain.dto.AddUserDto;
 import com.xiaored.domain.entity.User;
 
 
@@ -20,5 +21,7 @@ public interface UserService extends IService<User> {
     ResponseResult register(User user);
 
     ResponseResult listUsers(Integer pageNum,Integer pageSize,String userName,String phonenumber,String status);
+
+    ResponseResult addUser(AddUserDto addUserDto);
 }
 

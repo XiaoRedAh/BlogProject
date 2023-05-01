@@ -1,19 +1,21 @@
 package com.xiaored.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xiaored.domain.ResponseResult;
-import com.xiaored.domain.entity.Role;
+import com.xiaored.domain.dto.AddUserDto;
 import com.xiaored.domain.entity.User;
+import com.xiaored.domain.entity.UserRole;
 import com.xiaored.enums.AppHttpCodeEnum;
 import com.xiaored.exception.SystemException;
 import com.xiaored.mapper.UserMapper;
+import com.xiaored.service.UserRoleService;
 import com.xiaored.service.UserService;
 import com.xiaored.utils.BeanCopyUtils;
 import com.xiaored.utils.SecurityUtils;
 import com.xiaored.vo.PageVo;
-import com.xiaored.vo.RoleVo;
 import com.xiaored.vo.UserInfoVo;
 import com.xiaored.vo.UserVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Objects;
 
@@ -33,6 +36,8 @@ import java.util.Objects;
 @Service("userService")
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
+    @Resource
+    UserRoleService userRoleService;
     @Override
     public ResponseResult userInfo() {
         //获取当前用户id
@@ -100,6 +105,31 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         List<UserVo> userVos = BeanCopyUtils.copyBeanList(page.getRecords(), UserVo.class);
         PageVo pageVo = new PageVo(userVos,page.getTotal());
         return ResponseResult.okResult(pageVo);
+    }
+
+    @Override
+    public ResponseResult addUser(AddUserDto addUserDto) {
+        //用户名不能为空，否则提示：必需填写用户名
+        if (addUserDto.getUserName()==null)throw new SystemException(AppHttpCodeEnum.REQUIRE_USERNAME);
+        //用户名必须之前未存在，否则提示：用户名已存在
+        if(userNameExist(addUserDto.getUserName())) throw new SystemException(AppHttpCodeEnum.USERNAME_EXIST);
+        //手机号必须之前未存在，否则提示：手机号已存在
+        LambdaQueryWrapper<User> queryWrapper1 = new LambdaQueryWrapper<>();
+        queryWrapper1.eq(User::getPhonenumber,addUserDto.getPhonenumber());
+        if (count(queryWrapper1)>0)throw new SystemException(AppHttpCodeEnum.PHONENUMBER_EXIST);
+        //邮箱必须之前未存在，否则提示：邮箱已存在
+        LambdaQueryWrapper<User> queryWrapper2 = new LambdaQueryWrapper<>();
+        queryWrapper2.eq(User::getEmail,addUserDto.getEmail());
+        if (count(queryWrapper2)>0)throw new SystemException(AppHttpCodeEnum. EMAIL_EXIST);
+        //符合要求，才能将用户添加到数据库
+        User user = BeanCopyUtils.copyBean(addUserDto, User.class);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));//密码加密存储在数据库
+        save(user);
+        //然后还要把新用户的角色加入到用户角色关联表中
+        for (Long roleId: addUserDto.getRoleIds()) {
+            userRoleService.save(new UserRole(user.getId(),roleId));
+        }
+        return ResponseResult.okResult();
     }
 
     private boolean nickNameExist(String nickName) {

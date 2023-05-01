@@ -34,4 +34,9 @@ public class RoleController {
         return roleService.addRole(addRoleDto);
     }
 
+    @GetMapping("/listAllRole")
+    public ResponseResult listAllRole(){
+        return ResponseResult.okResult(roleService.list());
+    }
+
 }
