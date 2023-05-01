@@ -3,6 +3,7 @@ package com.xiaored.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xiaored.domain.ResponseResult;
 import com.xiaored.domain.dto.AddArticleDto;
+import com.xiaored.domain.dto.UpdateArticleDto;
 import com.xiaored.domain.entity.Article;
 
 public interface ArticleService extends IService<Article> {
@@ -23,4 +24,6 @@ public interface ArticleService extends IService<Article> {
     //ResponseResult updateArticle(Article article);
 
     ResponseResult deleteById(Long id);
+
+    ResponseResult updateArticle(UpdateArticleDto updateArticle);
 }

@@ -1,13 +1,13 @@
 package com.xiaored.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.AbstractWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xiaored.constants.SystemConstants;
 import com.xiaored.domain.ResponseResult;
 import com.xiaored.domain.dto.AddArticleDto;
+import com.xiaored.domain.dto.UpdateArticleDto;
 import com.xiaored.domain.entity.Article;
 import com.xiaored.domain.entity.ArticleTag;
 import com.xiaored.domain.entity.Category;
@@ -20,13 +20,11 @@ import com.xiaored.service.CommentService;
 import com.xiaored.utils.BeanCopyUtils;
 import com.xiaored.utils.RedisCache;
 import com.xiaored.vo.*;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -40,6 +38,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     RedisCache redisCache;
     @Resource
     CommentService commentService;
+
+    @Resource ArticleTagService articleTagService;
 
     @Override
     public ResponseResult hotArticleList() {
@@ -126,9 +126,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         return ResponseResult.okResult();
     }
 
-    @Autowired
-    private ArticleTagService articleTagService;
-
     @Override
     @Transactional
     public ResponseResult add(AddArticleDto articleDto) {
@@ -199,13 +196,21 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         return ResponseResult.okResult();
     }
 
-//    @Override
-//    public ResponseResult updateArticle(Article article) {
-//
-//        UpdateWrapper<ArticleTag> updateWrapper=new UpdateWrapper<>();
-//        updateWrapper.eq("article_id",article.getId());
-//        List<Long> tags=article.getTags();
-//        articleTagService
-//        updateWrapper.set("")
-//    }
+    @Override
+    public ResponseResult updateArticle(UpdateArticleDto updateArticle) {
+        //更新文章
+        Article article = BeanCopyUtils.copyBean(updateArticle, Article.class);
+        List<Long> tags = updateArticle.getTags();
+        updateById(article);
+        //更新文章标签关联表（把之前的关联关系全删了，然后再保存新的关联关系）
+        Long articleId = article.getId();
+        QueryWrapper<ArticleTag> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("article_id",articleId);
+        articleTagService.remove(queryWrapper);
+        for (Long tagId:tags) {
+            articleTagService.save(new ArticleTag(articleId,tagId));
+        }
+        return ResponseResult.okResult();
+    }
+
 }

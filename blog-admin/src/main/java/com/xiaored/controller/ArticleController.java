@@ -2,7 +2,7 @@ package com.xiaored.controller;
 
 import com.xiaored.domain.ResponseResult;
 import com.xiaored.domain.dto.AddArticleDto;
-import com.xiaored.domain.entity.Article;
+import com.xiaored.domain.dto.UpdateArticleDto;
 import com.xiaored.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -30,10 +30,8 @@ public class ArticleController {
     }
 
     @PutMapping()
-    public ResponseResult updateArticle(@RequestBody Article article){
-        //还没想好怎么改tags
-        return ResponseResult.okResult(articleService.updateById(article));
-        //return articleService.updateArticle(article);
+    public ResponseResult updateArticle(@RequestBody UpdateArticleDto updateArticle){
+       return articleService.updateArticle(updateArticle);
     }
 
     @DeleteMapping("/{id}")
