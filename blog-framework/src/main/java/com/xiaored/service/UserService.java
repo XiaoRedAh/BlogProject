@@ -3,6 +3,7 @@ package com.xiaored.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xiaored.domain.ResponseResult;
 import com.xiaored.domain.dto.AddUserDto;
+import com.xiaored.domain.dto.UpdateUserDto;
 import com.xiaored.domain.entity.User;
 
 
@@ -25,5 +26,7 @@ public interface UserService extends IService<User> {
     ResponseResult addUser(AddUserDto addUserDto);
 
     ResponseResult getInfo(Long id);
+
+    ResponseResult updateUser(UpdateUserDto updateUserDto);
 }
 

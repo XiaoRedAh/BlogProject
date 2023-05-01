@@ -14,5 +14,7 @@ import java.util.List;
  */
 public interface UserRoleService extends IService<UserRole> {
     List<Long> getRoleIdsByUserId(Long userId);
+
+    Integer removeByUserId(Long userId);
 }
 

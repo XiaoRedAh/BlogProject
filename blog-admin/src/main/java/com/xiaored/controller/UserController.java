@@ -2,6 +2,7 @@ package com.xiaored.controller;
 
 import com.xiaored.domain.ResponseResult;
 import com.xiaored.domain.dto.AddUserDto;
+import com.xiaored.domain.dto.UpdateUserDto;
 import com.xiaored.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,5 +25,10 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseResult getUserAndRoleInfo(@PathVariable("id") Long id){
         return userService.getInfo(id);
+    }
+
+    @PutMapping()
+    public  ResponseResult updateUser(@RequestBody UpdateUserDto updateUserDto){
+        return userService.updateUser(updateUserDto);
     }
 }

@@ -23,5 +23,10 @@ public class UserRoleServiceImpl extends ServiceImpl<UserRoleMapper, UserRole> i
     public List<Long> getRoleIdsByUserId(Long userId) {
         return mapper.getRoleIdsByUserId(userId);
     }
+
+    @Override
+    public Integer removeByUserId(Long userId) {
+        return mapper.removeByUserId(userId);
+    }
 }
 

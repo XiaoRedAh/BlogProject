@@ -17,5 +17,6 @@ public interface UserRoleMapper extends BaseMapper<UserRole> {
 
     @Select("select role_id from sys_user_role where user_id = #{userId}")
     List<Long> getRoleIdsByUserId(Long userId);
-
+    @Select("delete from sys_user_role where user_id = #{userId}")
+    Integer removeByUserId(Long userId);
 }

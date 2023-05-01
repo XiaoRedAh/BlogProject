@@ -2,10 +2,12 @@ package com.xiaored.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xiaored.domain.ResponseResult;
 import com.xiaored.domain.dto.AddUserDto;
+import com.xiaored.domain.dto.UpdateUserDto;
 import com.xiaored.domain.entity.Role;
 import com.xiaored.domain.entity.User;
 import com.xiaored.domain.entity.UserRole;
@@ -143,6 +145,28 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         UserRoleInfoVo userRoleInfoVo = new UserRoleInfoVo(roleIds,roles,updateUserVo);
         return ResponseResult.okResult(userRoleInfoVo);
 
+    }
+
+    @Override
+    public ResponseResult updateUser(UpdateUserDto updateUserDto) {
+        Long userId = updateUserDto.getId();
+        //更新用户信息
+        UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id",userId);
+        updateWrapper.set("email",updateUserDto.getEmail());
+        updateWrapper.set("phonenumber",updateUserDto.getPhonenumber());
+        updateWrapper.set("nick_name",updateUserDto.getNickName());
+        updateWrapper.set("sex",updateUserDto.getSex());
+        updateWrapper.set("status",updateUserDto.getStatus());
+        updateWrapper.set("user_name",updateUserDto.getUserName());
+        update(updateWrapper);
+        //更新用户与角色关联信息：删掉之前所有的关联信息，重新保存新的关联
+        List<Long> roleIds = userRoleService.getRoleIdsByUserId(userId);
+        userRoleService.removeByUserId(userId);
+        for (Long roleId: roleIds) {
+            userRoleService.save(new UserRole(userId,roleId));
+        }
+        return ResponseResult.okResult();
     }
 
     private boolean nickNameExist(String nickName) {
