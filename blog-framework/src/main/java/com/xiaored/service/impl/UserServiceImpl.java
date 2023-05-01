@@ -6,18 +6,18 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xiaored.domain.ResponseResult;
 import com.xiaored.domain.dto.AddUserDto;
+import com.xiaored.domain.entity.Role;
 import com.xiaored.domain.entity.User;
 import com.xiaored.domain.entity.UserRole;
 import com.xiaored.enums.AppHttpCodeEnum;
 import com.xiaored.exception.SystemException;
 import com.xiaored.mapper.UserMapper;
+import com.xiaored.service.RoleService;
 import com.xiaored.service.UserRoleService;
 import com.xiaored.service.UserService;
 import com.xiaored.utils.BeanCopyUtils;
 import com.xiaored.utils.SecurityUtils;
-import com.xiaored.vo.PageVo;
-import com.xiaored.vo.UserInfoVo;
-import com.xiaored.vo.UserVo;
+import com.xiaored.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -38,6 +38,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Resource
     UserRoleService userRoleService;
+    @Resource
+    RoleService roleService;
     @Override
     public ResponseResult userInfo() {
         //获取当前用户id
@@ -130,6 +132,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             userRoleService.save(new UserRole(user.getId(),roleId));
         }
         return ResponseResult.okResult();
+    }
+
+    @Override
+    public ResponseResult getInfo(Long id) {
+        List<Role> roles = roleService.list();
+        User user = getById(id);
+        UpdateUserVo updateUserVo = BeanCopyUtils.copyBean(user,UpdateUserVo.class);
+        List<Long> roleIds = userRoleService.getRoleIdsByUserId(id);
+        UserRoleInfoVo userRoleInfoVo = new UserRoleInfoVo(roleIds,roles,updateUserVo);
+        return ResponseResult.okResult(userRoleInfoVo);
+
     }
 
     private boolean nickNameExist(String nickName) {

@@ -20,4 +20,9 @@ public class UserController {
     public ResponseResult addUser(@RequestBody AddUserDto addUserDto){
         return userService.addUser(addUserDto);
     }
+
+    @GetMapping("/{id}")
+    public ResponseResult getUserAndRoleInfo(@PathVariable("id") Long id){
+        return userService.getInfo(id);
+    }
 }

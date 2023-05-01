@@ -23,5 +23,7 @@ public interface UserService extends IService<User> {
     ResponseResult listUsers(Integer pageNum,Integer pageSize,String userName,String phonenumber,String status);
 
     ResponseResult addUser(AddUserDto addUserDto);
+
+    ResponseResult getInfo(Long id);
 }
 
